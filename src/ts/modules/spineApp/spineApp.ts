@@ -5,7 +5,6 @@ export class SpineApp implements spine.SpineCanvasApp {
   private skeleton: unknown // type: spine.Skeleton
   private state: unknown // type: spine.AnimationState
   private pixelRatio: number = window.devicePixelRatio || 1
-  private aspectRatio: number = 0
 
   loadAssets = (canvas: spine.SpineCanvas) => {
     // atlasファイルをロード
@@ -32,30 +31,23 @@ export class SpineApp implements spine.SpineCanvasApp {
     this.skeleton = new spine.Skeleton(skeltonData)
 
     if (!(this.skeleton instanceof spine.Skeleton)) return
-    // canvas.gl.drawingBufferWidth // 150
-    // this.skeleton.data.width // 434.38
-
-    // アスペクト比を更新
-    this.aspectRatio = this.skeleton.data.height / this.skeleton.data.width
-
-    // console.log(this.aspectRatio)
-    console.log(canvas)
 
     // skeletonの大きさをセット
-    this.skeleton.scaleX = 0.2
-    // (canvas.gl.drawingBufferWidth * 0.8) / this.skeleton.data.width
-    this.skeleton.scaleY = 0.2
-    // this.skeleton.scaleY =
-    //   ((canvas.gl.drawingBufferWidth * 0.6) / this.skeleton.data.width) *
-    //   this.aspectRatio
+    this.skeleton.scaleX = 0.5 * this.pixelRatio
+    this.skeleton.scaleY = 0.5 * this.pixelRatio
 
     console.log(this.skeleton)
     // console.log(canvas.gl.drawingBufferHeight)
     // console.log(this.pixelRatio)
 
     // skeletonの位置をセット
-    this.skeleton.x = 0 // canvas.gl.drawingBufferWidth / 2
-    this.skeleton.y = 0 // (-1 * Math.floor(this.skeleton.data.height / this.pixelRatio)) / 2
+    this.skeleton.x = 0
+    this.skeleton.y =
+      (Math.floor(
+        this.skeleton.data.height * this.skeleton.scaleY * this.pixelRatio
+      ) /
+        2) *
+      -1
 
     // アニメーション情報を取得
     const stateData = new spine.AnimationStateData(skeltonData)
@@ -69,8 +61,6 @@ export class SpineApp implements spine.SpineCanvasApp {
     this.state.apply(this.skeleton)
     this.skeleton.updateWorldTransform()
 
-    // console.log(this.skeleton)
-    // console.log(SkeletonBounds)
     canvas.input.addListener({
       down: (x, y) => {
         if (!(this.skeleton instanceof spine.Skeleton)) return
@@ -86,14 +76,17 @@ export class SpineApp implements spine.SpineCanvasApp {
         const skelBounds = new SkeletonBounds()
         skelBounds.update(this.skeleton, true)
 
-        console.log(skelBounds)
-        // console.log(x, y)
-
-        // console.log(skelBounds.containsPoint(x, y))
         if (
           skelBounds.containsPoint(
             x - canvas.gl.drawingBufferWidth / 2,
-            y - (canvas.gl.drawingBufferHeight / 2) + (this.skeleton.data.height * this.skeleton.scaleY)
+            y -
+              canvas.gl.drawingBufferHeight / 2 +
+              Math.floor(
+                this.skeleton.data.height *
+                  this.skeleton.scaleY *
+                  this.pixelRatio
+              ) /
+                2
           )
         ) {
           console.log('click')
