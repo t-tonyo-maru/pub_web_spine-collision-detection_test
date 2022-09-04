@@ -31,15 +31,9 @@ export class SpineApp implements spine.SpineCanvasApp {
     this.skeleton = new spine.Skeleton(skeltonData)
 
     if (!(this.skeleton instanceof spine.Skeleton)) return
-
     // skeletonの大きさをセット
     this.skeleton.scaleX = 0.5 * this.pixelRatio
     this.skeleton.scaleY = 0.5 * this.pixelRatio
-
-    console.log(this.skeleton)
-    // console.log(canvas.gl.drawingBufferHeight)
-    // console.log(this.pixelRatio)
-
     // skeletonの位置をセット
     this.skeleton.x = 0
     this.skeleton.y =
@@ -55,44 +49,25 @@ export class SpineApp implements spine.SpineCanvasApp {
     stateData.defaultMix = 0.1
     // アニメーションをセット
     this.state = new spine.AnimationState(stateData)
+
     if (!(this.state instanceof spine.AnimationState)) return
     this.state.setAnimation(0, 'animation', true)
-
     this.state.apply(this.skeleton)
     this.skeleton.updateWorldTransform()
 
+    // canvasに対してイベントを設置
     canvas.input.addListener({
+      // 押下した時
       down: (x, y) => {
         if (!(this.skeleton instanceof spine.Skeleton)) return
-        // console.log(this.skeleton.getBoundsRect())
-        // const offset = new spine.Vector2(),
-        //   size = new spine.Vector2()
-        // console.log(this.skeleton.getBounds(offset, size))
-        // console.log('down Event', x, y)
-
-        // const skelBounds = this.skeleton.data
-        // console.log(this.skeleton)
-
         const skelBounds = new SkeletonBounds()
         skelBounds.update(this.skeleton, true)
-
-        if (
-          skelBounds.containsPoint(
-            x - canvas.gl.drawingBufferWidth / 2,
-            y -
-              canvas.gl.drawingBufferHeight / 2 +
-              Math.floor(
-                this.skeleton.data.height *
-                  this.skeleton.scaleY *
-                  this.pixelRatio
-              ) /
-                2
-          )
-        ) {
-          console.log('click')
-        } else {
-          console.log('not click')
-        }
+        // 境界ボックスアタッチメントのヒット判定を取得
+        const hitPoint = skelBounds.containsPoint(
+          x - canvas.gl.drawingBufferWidth / 2,
+          y - canvas.gl.drawingBufferHeight / 2
+        )
+        console.log(hitPoint ? 'hit' : 'not hit')
       }
     })
   }
@@ -100,7 +75,6 @@ export class SpineApp implements spine.SpineCanvasApp {
   update = (canvas: spine.SpineCanvas, delta: number) => {
     if (!(this.skeleton instanceof spine.Skeleton)) return
     if (!(this.state instanceof spine.AnimationState)) return
-
     // アニメーションを更新
     this.state.update(delta)
     this.state.apply(this.skeleton)
@@ -109,7 +83,6 @@ export class SpineApp implements spine.SpineCanvasApp {
 
   render = (canvas: spine.SpineCanvas) => {
     if (!(this.skeleton instanceof spine.Skeleton)) return
-
     // レンダラーを取得
     const renderer = canvas.renderer
     // 画面リサイズ（ブラウザサイズが変更された時の対応）
