@@ -1,10 +1,14 @@
-// import { createPadZero } from './module/zeroPadding/zeroPadding'
+// spine
+import * as spine from '@esotericsoftware/spine-webgl'
+// module
+import { SpineApp } from './modules/spineApp/spineApp'
 
 window.onload = () => {
-  console.log('hello!! world!!')
-
-  // 開発と本番のどちらの環境かを取得
-  console.log(process.env.NODE_ENV) // development || production
-  // 環境変数を取得
-  console.log(process.env.APP_URL)
+  // canvas要素
+  const canvas = document.querySelector('.js-canvas') as HTMLCanvasElement
+  // canvas 要素と SpineApp インスタンスを紐付ける
+  new spine.SpineCanvas(canvas, {
+    pathPrefix: 'assets/spine-data/',
+    app: new SpineApp()
+  })
 }
